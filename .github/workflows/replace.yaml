@@ -18,23 +18,14 @@ jobs:
         with:
           python-version: '3.x'  # Specify the Python version you want to use
 
-      - name: Search and replace phrase in .html files
+      - name: Search and replace phrase in .html files and commit changes
         env:
-          SEARCH_PHRASE: "old_phrase"
-          REPLACE_PHRASE: "new_phrase"
+          SEARCH_PHRASE: "old_phrase"  # Set your old phrase here
+          REPLACE_PHRASE: "new_phrase"  # Set your new phrase here
         run: |
           find . -name "*.html" -type f -exec sed -i "s/${SEARCH_PHRASE}/${REPLACE_PHRASE}/g" {} +
-
-      - name: Configure Git
-        run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Commit and push changes
-        env:
-          SEARCH_PHRASE: "old_phrase"
-          REPLACE_PHRASE: "new_phrase"
-        run: |
           DATE=$(date +'%Y-%m-%d')
           git add .
           git commit -m "change ${SEARCH_PHRASE} to ${REPLACE_PHRASE} on ${DATE}"
