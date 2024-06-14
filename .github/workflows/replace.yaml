@@ -1,9 +1,16 @@
 name: Search and Replace
 
 on:
-  push:
-    branches:
-      - main  # or any branch you want to listen to
+  workflow_dispatch:  # Allows manual triggering of the workflow
+    inputs:
+      search_phrase:
+        description: 'Phrase to search for'
+        required: true
+        default: 'old_phrase'
+      replace_phrase:
+        description: 'Phrase to replace with'
+        required: true
+        default: 'new_phrase'
 
 jobs:
   search_and_replace:
@@ -20,8 +27,8 @@ jobs:
 
       - name: Search and replace phrase in .html files and commit changes
         env:
-          SEARCH_PHRASE: "0813 9249 5895 (Agus)"  # Set your old phrase here
-          REPLACE_PHRASE: "0822 9833 9719 (David)"  # Set your new phrase here
+          SEARCH_PHRASE: ${{ github.event.inputs.search_phrase }}
+          REPLACE_PHRASE: ${{ github.event.inputs.replace_phrase }}
         run: |
           find . -name "*.html" -type f -exec sed -i "s/${SEARCH_PHRASE}/${REPLACE_PHRASE}/g" {} +
           git config --global user.name 'github-actions[bot]'
