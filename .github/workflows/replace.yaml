@@ -33,7 +33,10 @@ jobs:
           SEARCH_PHRASE: ${{ github.event.inputs.search_phrase }}
           REPLACE_PHRASE: ${{ github.event.inputs.replace_phrase }}
         run: |
-          find . -name "*.html" -type f -exec sed -i "s/${SEARCH_PHRASE}/${REPLACE_PHRASE}/g" {} +
+          ESCAPED_SEARCH=$(printf '%s\n' "${SEARCH_PHRASE}" | sed 's:[\/&]:\\&:g')
+          ESCAPED_REPLACE=$(printf '%s\n' "${REPLACE_PHRASE}" | sed 's:[\/&]:\\&:g')
+          find . -name "*.html" -type f -exec sed -i "s|${ESCAPED_SEARCH}|${ESCAPED_REPLACE}|g" {} +
+
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           DATE=$(date +'%Y-%m-%d')
