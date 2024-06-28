@@ -23,11 +23,11 @@ jobs:
               url="${BASE_URL}/$(echo ${file#./} | sed 's/.html$//' | sed 's/ /%20/g')"
             fi
             lastmod=$(date +'%Y-%m-%dT%H:%M:%S+00:00')
-            echo '<url><loc>'${url}'</loc><lastmod>'${lastmod}'</lastmod><priority>0.80</priority></url>' >> sitemap-complete.xml
+            echo -e "<url>\n  <loc>${url}</loc>\n  <lastmod>${lastmod}</lastmod>\n  <priority>0.80</priority>\n</url>" >> sitemap-complete.xml
           done
           echo '</urlset>' >> sitemap-complete.xml
 
-      - env: {GH_PAT: ${{ secrets.GH_PAT }}}
+      - env: { GH_PAT: ${{ secrets.GH_PAT }} }
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
