@@ -10,10 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - run: |
-          BASE_URL="https://$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]')"
+      - name: Generate sitemap
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          BASE_URL="https://$(echo $REPO_NAME | tr '[:upper:]' '[:lower:]')"
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap-complete.xml
           echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap-complete.xml
           find . -name "*.html" | while read file; do
@@ -27,7 +31,9 @@ jobs:
           done
           echo '</urlset>' >> sitemap-complete.xml
 
-      - env: { GH_PAT: ${{ secrets.GH_PAT }} }
+      - name: Commit and push sitemap
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
