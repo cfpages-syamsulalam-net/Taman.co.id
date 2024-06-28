@@ -10,17 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Generate sitemap
-        env:
-          REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          BASE_URL="https://$(echo $REPO_NAME | tr '[:upper:]' '[:lower:]')"
+      - run: |
+          BASE_URL="https://$(echo ${{ github.event.repository.name }} | tr '[:upper:]' '[:lower:]')"
           echo '<?xml version="1.0" encoding="UTF-8"?>' > sitemap-complete.xml
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">' >> sitemap-complete.xml
-          echo '<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->' >> sitemap-complete.xml
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> sitemap-complete.xml
           find . -name "*.html" | while read file; do
             if [[ $file == *"index.html" ]]; then
               url="${BASE_URL}/$(echo ${file#./} | sed 's/index.html$//' | sed 's/ /%20/g')"
@@ -28,17 +23,11 @@ jobs:
               url="${BASE_URL}/$(echo ${file#./} | sed 's/.html$//' | sed 's/ /%20/g')"
             fi
             lastmod=$(date +'%Y-%m-%dT%H:%M:%S+00:00')
-            echo '<url>' >> sitemap-complete.xml
-            echo "  <loc>${url}</loc>" >> sitemap-complete.xml
-            echo "  <lastmod>${lastmod}</lastmod>" >> sitemap-complete.xml
-            echo "  <priority>0.80</priority>" >> sitemap-complete.xml
-            echo '</url>' >> sitemap-complete.xml
+            echo '<url><loc>'${url}'</loc><lastmod>'${lastmod}'</lastmod><priority>0.80</priority></url>' >> sitemap-complete.xml
           done
           echo '</urlset>' >> sitemap-complete.xml
 
-      - name: Commit and push sitemap
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+      - env: {GH_PAT: ${{ secrets.GH_PAT }}}
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
