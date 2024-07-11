@@ -1,4 +1,4 @@
-name: Search and Replace
+name: Search and Replace v.2
 
 on:
   workflow_dispatch:  # Allows manual triggering of the workflow
@@ -6,11 +6,13 @@ on:
       search_phrase:
         description: 'Phrase to search for'
         required: true
-        default: 'old_phrase'
       replace_phrase:
         description: 'Phrase to replace with'
         required: true
-        default: 'new_phrase'
+      file_name_contains:
+        description: 'Phrase contained in the file name (optional)'
+        required: false
+        default: ''
 
 permissions:
   contents: write  # Grant write permissions to the repository contents
@@ -18,7 +20,6 @@ permissions:
 jobs:
   search_and_replace:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -32,16 +33,13 @@ jobs:
         env:
           SEARCH_PHRASE: ${{ github.event.inputs.search_phrase }}
           REPLACE_PHRASE: ${{ github.event.inputs.replace_phrase }}
+          FILE_NAME_CONTAINS: ${{ github.event.inputs.file_name_contains }}
         run: |
-          ESCAPED_SEARCH=$(printf '%s\n' "${SEARCH_PHRASE}" | sed 's:[\/&]:\\&:g')
-          ESCAPED_REPLACE=$(printf '%s\n' "${REPLACE_PHRASE}" | sed 's:[\/&]:\\&:g')
-          find . -name "*.html" -type f -exec sed -i "s|${ESCAPED_SEARCH}|${ESCAPED_REPLACE}|g" {} +
-
+          find . -name "*${FILE_NAME_CONTAINS}*.html" -type f -exec sed -i "s|$(printf '%s\n' "${SEARCH_PHRASE}" | sed 's:[\/&]:\\&:g')|$(printf '%s\n' "${REPLACE_PHRASE}" | sed 's:[\/&]:\\&:g')|g" {} +
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          DATE=$(date +'%Y-%m-%d')
           git add .
-          git commit -m "change ${SEARCH_PHRASE} to ${REPLACE_PHRASE} on ${DATE}"
+          git commit -m "change ${SEARCH_PHRASE} to ${REPLACE_PHRASE} on $(date +'%Y-%m-%d')"
 
       - name: Push changes
         env:
