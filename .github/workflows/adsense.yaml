@@ -1,4 +1,4 @@
-name: Google Adsense Script and ads.txt
+name: Google Adsense Script & ads.txt v.2
 on:
   push:
     paths:
